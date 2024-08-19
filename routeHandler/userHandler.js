@@ -67,4 +67,16 @@ router.post('/login',async(req,res)=>{
     }
 })
 
+router.get('/all',async(req,res)=>{
+    try{
+        const data= await User.find().populate("todos");
+        res.status(200).json(data); 
+    }catch(err){
+        res.status(500).json({
+            message:'Something went wrong',
+            error:err
+        });
+    }
+});
+
 module.exports=router;

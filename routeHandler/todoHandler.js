@@ -2,11 +2,15 @@ const express=require('express');
 const router= express.Router();
 const mongoose= require('mongoose');
 const todoSchema= require('../schemas/todoSchema');
+const userSchema= require('../schemas/userSchema');
 
 const Todo= mongoose.model('Todo',todoSchema);
+const User= mongoose.model('User',userSchema);
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: true }));
+
+const checklogin=require('../middlewares/checklogin');
 
 
 
@@ -32,18 +36,36 @@ router.get('/active',async(req,res)=>{
 
 
 
-
+/*
+*Title: Relation field
+*Description: This method using populate we are trying to create relation between two saparate json file.
+*Author: Nahid Hasan
+*Date: Jul 8, 2024
+*/
 //GET ALL THE TODOS
 router.get('/',async(req,res)=>{
-    //first parameter is for filtering
-    await Todo.find({status:'active'}).then((data)=>{
+    // //first parameter is for filtering
+    // await Todo.find({status:'active'}).then((data)=>{
+    //     res.send(data);
+    //     /*
+    //         res.status(200).json(data);
+    //     */
+    // }).catch((err)=>{
+    //     console.log(err);
+    // })
+
+    try{
+        data= await Todo.find({})
+        .populate('user')//populate for expand by id. vitore 2 ta parameter dewa jay. 1st for what we want to expand. 2nd for how we want to expand. For 2nd instance
+                        // .populate('user',['_id','name'])
+        .select({ _id:0,_v:0})
+        .limit(10)
+
         res.send(data);
-        /*
-            res.status(200).json(data);
-        */
-    }).catch((err)=>{
+    }catch(err){
         console.log(err);
-    })
+    }
+
 
 
     //if we want we will response some particular field from the full data..then.....
@@ -67,9 +89,8 @@ router.get('/:id',async(req,res)=>{
 
 //POST A TODO
 // Example route handler for creating a new Todo
-router.post('/', async (req, res) => {
+router.post('/',checklogin, async (req, res) => {
     try {
-        console.log(req.body);
 
         // Validate if title is provided
         if (!req.body.title) {
@@ -80,10 +101,16 @@ router.post('/', async (req, res) => {
         }
 
         // Create a new Todo
-        const todo = new Todo(req.body);
+        const todo = new Todo({
+            ...req.body,//... diye req.body er shob bahir kore niye asha hoy.
+            user: req.userId,//ekhane amra user er modhe userId dhukiye dilam.
+        });
 
         // Save the Todo
         const savedTodo = await todo.save();
+        //for many to one relationship( like user is one and todo is many)
+        await User.updateOne({ _id: req.userId }, { $push: { todos: savedTodo._id } });
+
         res.status(200).json(savedTodo);
 
     } catch (err) {

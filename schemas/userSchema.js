@@ -17,7 +17,14 @@ const userSchima=mongoose.Schema({
         type:String,
         enum:['active','inactive'],
         default:'active'
-    }
+    },
+    //suppose when we want to show all the todo corresponding to a user. then we have to take array like below.
+    todos:[
+        {
+            type:mongoose.Types.ObjectId,
+            ref:'Todo'
+        }
+    ]
 });
 
 

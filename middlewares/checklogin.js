@@ -1,3 +1,9 @@
+/*
+*Title: Authentication middleware
+*Description: In this middleware we will check the token.
+*Author: Nahid Hasan
+*Date: Jul 8, 2024
+*/
 const jwt= require('jsonwebtoken');
 const checklogin=(req,res,next)=>{
     const {authorization}=req.headers;
