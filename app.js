@@ -1,11 +1,13 @@
 
 const express= require('express');
-
+const dotenv= require('dotenv');
 const mongoose=require('mongoose');
 
 const todoHandler=require('./routeHandler/todoHandler');
+const userHandler=require('./routeHandler/userHandler');
 
 const app = express();
+dotenv.config();
 
 app.locals.anything='Nahid Hasan';
 
@@ -34,6 +36,7 @@ mongoose.connect('mongodb://localhost:27017/todos',{}).then(()=>{
 })
 
 app.use('/todo',todoHandler);
+app.use('/user',userHandler);
 
 app.all('/admin',handle);
 
